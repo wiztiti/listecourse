@@ -1,1 +1,1671 @@
 
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>MaCourse</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;900&family=Pacifico&family=Oswald:wght@700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --rose: #FF6B9D;
+    --jaune: #FFD93D;
+    --blanc: #FFFFFF;
+    --gris-clair: #F5F5F5;
+    --gris: #888;
+    --ombre: 0 4px 20px rgba(0,0,0,0.10);
+    --ombre-forte: 0 8px 32px rgba(0,0,0,0.16);
+    --radius: 22px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    width: 100vw;
+    overflow-x: hidden;
+  }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    min-height: 100dvh;
+    background: linear-gradient(170deg, #FF6B9D 0%, #FF9A6C 40%, #FFD93D 100%);
+    padding: 16px 0 100px 0;
+    touch-action: pan-y;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* WRAPPER GLOBAL */
+  .app-wrap {
+    width: 100%;
+    max-width: 520px;
+    padding: 0;
+  }
+
+  /* GRILLE */
+  .grille {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    padding: 12px 14px;
+  }
+
+  /* CARTE */
+  .carte {
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: var(--ombre);
+    cursor: pointer;
+    transition: transform 0.18s, box-shadow 0.18s;
+    position: relative;
+    overflow: hidden;
+    user-select: none;
+  }
+  .carte:active { transform: scale(0.96); }
+  .carte.ouverte { grid-column: 1 / -1; cursor: default; }
+
+  .carte-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 26px 16px 22px;
+    min-height: 120px;
+  }
+
+  .carte-logo {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.7rem;
+    font-weight: 900;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+  .carte-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 14px;
+  }
+
+  .carte-nom {
+    font-size: 0.88rem;
+    font-weight: 800;
+    color: #333;
+    text-align: center;
+    line-height: 1.2;
+  }
+
+  /* Badge compteur */
+  .badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: var(--rose);
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 900;
+    border-radius: 50px;
+    padding: 2px 8px;
+    min-width: 22px;
+    text-align: center;
+  }
+
+  /* CARTE LISTE */
+  .carte-liste { grid-column: 1 / -1; }
+  .carte-liste .carte-header { background: linear-gradient(135deg, #fff5f9, #fff); min-height: 60px; padding: 10px 16px; flex-direction: row; justify-content: center; gap: 12px; }
+  .carte-liste .carte-logo { background: linear-gradient(135deg, #FF6B9D, #FF9A6C); color: white; width: 38px !important; height: 38px !important; font-size: 1.1rem !important; border-radius: 10px !important; }
+
+  .carte-liste.ouverte .carte-header { border-bottom: 1px solid #f0f0f0; }
+  .corps-liste { padding: 0 16px 18px; display: none; }
+  .carte.ouverte .corps-liste { display: block; }
+
+  .input-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .input-row input[type="text"] {
+    flex: 1;
+    border: 2px solid #eee;
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.92rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .input-row input:focus { border-color: var(--rose); }
+  .input-row select {
+    border: 2px solid #eee;
+    border-radius: 12px;
+    padding: 10px 10px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.85rem;
+    outline: none;
+    background: white;
+    color: #444;
+    transition: border-color 0.2s;
+    max-width: 130px;
+  }
+  .input-row select:focus { border-color: var(--rose); }
+
+  .btn {
+    background: linear-gradient(135deg, var(--rose), #FF9A6C);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 10px 16px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    flex-shrink: 0;
+  }
+  .btn:active { opacity: 0.8; transform: scale(0.95); }
+
+  .article-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border-radius: 12px;
+    margin-bottom: 6px;
+    background: #fafafa;
+    border: 1px solid #f0f0f0;
+    transition: background 0.15s;
+  }
+  .article-item .puce {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .article-item .art-nom {
+    flex: 1;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #333;
+  }
+  .article-item .art-enseigne {
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: #888;
+    background: #eee;
+    padding: 2px 8px;
+    border-radius: 50px;
+  }
+  .article-item .btn-suppr {
+    background: none;
+    border: none;
+    color: #ccc;
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 0 2px;
+    transition: color 0.15s;
+  }
+  .article-item .btn-suppr:hover { color: #FF6B9D; }
+
+  .vide { color: #bbb; font-size: 0.85rem; text-align: center; padding: 12px 0; font-weight: 600; }
+
+  /* CARTE "JE PARS" */
+  .carte-pars .carte-header { background: linear-gradient(135deg, #f0fff4, #fff); }
+  .carte-pars .carte-logo { background: linear-gradient(135deg, #43e97b, #38f9d7); color: white; font-size: 1.5rem; }
+
+  /* CARTE ENSEIGNE */
+  .carte-magasin .carte-logo { border: 2px solid #eee; }
+
+  /* CARTE REGLAGES */
+  .carte-reglages { grid-column: 1 / -1; }
+  .carte-reglages .carte-header { background: linear-gradient(135deg, #f8f4ff, #fff); min-height: 60px; padding: 10px 16px; flex-direction: row; justify-content: center; gap: 12px; }
+  .carte-reglages .carte-logo { background: linear-gradient(135deg, #a18cd1, #fbc2eb); color: white; font-size: 1.1rem; width: 38px !important; height: 38px !important; border-radius: 10px !important; }
+
+
+  .carte-reglages.ouverte .carte-header { border-bottom: 1px solid #f0f0f0; }
+  .corps-reglages { padding: 0 16px 18px; display: none; }
+  .carte-reglages.ouverte .corps-reglages { display: block; }
+
+  .section-titre {
+    font-size: 0.78rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #aaa;
+    margin: 14px 0 10px;
+  }
+
+  .enseigne-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 14px;
+    background: #fafafa;
+    border: 1.5px solid #eee;
+    margin-bottom: 8px;
+  }
+  .enseigne-mini-logo {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    font-weight: 900;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+  .enseigne-mini-logo img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
+  .enseigne-row .enseigne-nom { flex: 1; font-weight: 800; font-size: 0.9rem; color: #333; }
+  .btn-small {
+    border: none;
+    border-radius: 9px;
+    padding: 6px 12px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: opacity 0.18s;
+  }
+  .btn-small:active { opacity: 0.7; }
+  .btn-edit { background: #f0f0f0; color: #555; }
+  .btn-suppr-e { background: #ffe5ee; color: var(--rose); }
+  .btn-add-enseigne {
+    width: 100%;
+    padding: 12px;
+    border-radius: 14px;
+    border: 2px dashed #ddd;
+    background: none;
+    color: #aaa;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+    margin-top: 4px;
+  }
+  .btn-add-enseigne:hover { border-color: var(--rose); color: var(--rose); }
+
+  /* DRAG */
+  .carte.dragging {
+    opacity: 0.5;
+    transform: scale(1.04);
+    box-shadow: var(--ombre-forte);
+    z-index: 100;
+  }
+  .carte.drag-over { outline: 3px dashed var(--rose); outline-offset: -3px; }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s;
+  }
+  .modal-overlay.visible { opacity: 1; pointer-events: all; }
+
+  .modal {
+    background: white;
+    border-radius: 28px 28px 0 0;
+    padding: 24px 20px 40px;
+    width: 100%;
+    max-width: 520px;
+    max-height: 85dvh;
+    overflow-y: auto;
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .modal-overlay.visible .modal { transform: translateY(0); }
+  #modal-courses .modal { height: 90dvh; min-height: 90dvh; display: flex; flex-direction: column; }
+  #modal-courses #modal-courses-liste { flex: 1; overflow-y: auto; }
+  #modal-courses #btn-effacer-coches { flex-shrink: 0; }
+
+  .modal-handle {
+    width: 40px;
+    height: 4px;
+    background: #ddd;
+    border-radius: 4px;
+    margin: 0 auto 20px;
+  }
+
+  .modal-titre {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .modal-titre h2 {
+    font-size: 1.3rem;
+    font-weight: 900;
+    color: #222;
+  }
+
+  .modal-logo {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    font-weight: 900;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .modal-logo img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; }
+
+  .modal-article {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 14px;
+    border-radius: 14px;
+    margin-bottom: 8px;
+    background: #f9f9f9;
+    cursor: pointer;
+    transition: background 0.15s;
+    border: 1.5px solid transparent;
+  }
+  .modal-article:active { background: #f0f0f0; }
+  .modal-article.barre {
+    background: #f0f0f0;
+    border-color: #e0e0e0;
+  }
+  .modal-article.barre .modal-art-nom {
+    text-decoration: line-through;
+    color: #aaa;
+  }
+  .modal-art-check {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2.5px solid #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+  .modal-article.barre .modal-art-check {
+    background: #43e97b;
+    border-color: #43e97b;
+    color: white;
+    font-size: 0.8rem;
+  }
+  .modal-art-nom { font-weight: 700; font-size: 0.95rem; color: #333; flex: 1; }
+  .modal-art-drag {
+    color: #ccc;
+    font-size: 1.1rem;
+    padding: 0 4px 0 10px;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+    flex-shrink: 0;
+  }
+  .modal-article { display: flex; align-items: center; }
+  .modal-article.dragging-art { opacity: 0.4; }
+  .modal-article.drag-over-art { border-top: 2px solid #FF6B9D; }
+
+
+  .modal-vide { color: #bbb; text-align: center; padding: 30px 0; font-weight: 600; }
+
+  .btn-modal-fermer {
+    width: 100%;
+    margin-top: 18px;
+    padding: 14px;
+    background: linear-gradient(135deg, var(--rose), #FF9A6C);
+    color: white;
+    border: none;
+    border-radius: 16px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 900;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+
+  /* MODAL CHOIX ENSEIGNE (pour "je pars") */
+  .enseigne-choix-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+  .enseigne-choix-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 16px 10px;
+    border-radius: 16px;
+    border: 2px solid #eee;
+    background: white;
+    cursor: pointer;
+    transition: border-color 0.18s, box-shadow 0.18s;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.85rem;
+    color: #333;
+  }
+  .enseigne-choix-btn:active { border-color: var(--rose); box-shadow: 0 0 0 3px rgba(255,107,157,0.15); }
+
+  /* MODALE ÉDITION ENSEIGNE */
+  .form-group { margin-bottom: 14px; }
+  .form-label { font-size: 0.8rem; font-weight: 900; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; display: block; }
+  .form-input {
+    width: 100%;
+    border: 2px solid #eee;
+    border-radius: 12px;
+    padding: 11px 14px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.92rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .form-input:focus { border-color: var(--rose); }
+
+  .color-picker-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .color-swatch {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 3px solid transparent;
+    cursor: pointer;
+    transition: transform 0.15s, border-color 0.15s;
+  }
+  .color-swatch.active { border-color: #333; transform: scale(1.15); }
+
+  .logo-options {
+    display: flex;
+    gap: 10px;
+  }
+  .logo-opt {
+    flex: 1;
+    padding: 12px 8px;
+    border-radius: 12px;
+    border: 2px solid #eee;
+    background: white;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.8rem;
+    color: #555;
+    cursor: pointer;
+    text-align: center;
+    transition: border-color 0.18s;
+  }
+  .logo-opt.active { border-color: var(--rose); color: var(--rose); }
+
+  .btn-valider {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, var(--rose), #FF9A6C);
+    color: white;
+    border: none;
+    border-radius: 16px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 900;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-top: 8px;
+  }
+
+  /* Chevron */
+  .chevron {
+    position: absolute;
+    bottom: 10px;
+    right: 14px;
+    font-size: 0.75rem;
+    color: #ccc;
+    transition: transform 0.25s;
+  }
+  .carte.ouverte .chevron { transform: rotate(180deg); }
+
+  /* Ligne séparatrice */
+  .sep {
+    height: 1px;
+    background: #eee;
+    margin: 12px 0;
+  }
+
+  /* Input couleur custom */
+
+  /* RECHERCHE LOGO */
+  .logo-search-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-top: 10px;
+  }
+  .btn-chercher-logo {
+    flex: 1;
+    padding: 10px 14px;
+    border-radius: 12px;
+    border: 2px solid #eee;
+    background: white;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.85rem;
+    color: #555;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .btn-chercher-logo:hover { border-color: var(--rose); color: var(--rose); }
+  .logo-apercu-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 14px;
+    background: #f9f9f9;
+    border: 1.5px solid #eee;
+    margin-top: 10px;
+  }
+  .logo-apercu-img {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    object-fit: contain;
+    background: white;
+    border: 1px solid #eee;
+  }
+  .logo-apercu-txt {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #555;
+  }
+  .logo-apercu-txt span { color: #aaa; font-weight: 600; font-size: 0.78rem; display: block; margin-top: 2px; }
+  .btn-logo-suppr {
+    margin-left: auto;
+    background: #ffe5ee;
+    color: var(--rose);
+    border: none;
+    border-radius: 9px;
+    padding: 6px 10px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.78rem;
+    cursor: pointer;
+  }
+
+  input[type="color"] {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 3px solid #eee;
+    cursor: pointer;
+    padding: 0;
+    background: none;
+  }
+</style>
+</head>
+<body>
+
+<div class="app-wrap">
+<div class="grille" id="grille">
+  <!-- Les cartes sont générées par JS -->
+</div>
+</div><!-- /app-wrap -->
+
+<!-- MODAL JE PARS : choix enseigne -->
+<div class="modal-overlay" id="modal-choix">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-titre">
+      <span style="font-size:1.6rem">🏪</span>
+      <h2>Dans quel magasin ?</h2>
+    </div>
+    <div class="enseigne-choix-grid" id="enseigne-choix-grid"></div>
+    <button class="btn-modal-fermer" onclick="fermerModal('modal-choix')">Annuler</button>
+  </div>
+</div>
+
+<!-- MODAL LISTE EN COURS -->
+<div class="modal-overlay" id="modal-courses">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-titre" id="modal-courses-titre" onclick="fermerModal('modal-courses')" style="cursor:pointer"></div>
+    <div id="modal-courses-liste"></div>
+    <div style="display:flex;gap:8px;margin-top:12px;flex-shrink:0">
+      <input class="form-input" type="text" id="modal-cours-input" placeholder="Ajouter un produit…" style="flex:1;margin:0" onkeydown="if(event.key==='Enter')ajouterDepuisModal()">
+      <button onclick="ajouterDepuisModal()" style="background:linear-gradient(135deg,#FF6B9D,#FF9A6C);color:white;border:none;border-radius:12px;padding:0 16px;font-size:1.2rem;cursor:pointer;font-weight:900">+</button>
+    </div>
+    <div id="btn-effacer-coches" style="display:none;margin-top:16px;border-top:1px solid #f0f0f0;padding-top:16px">
+      <label style="display:flex;align-items:center;gap:10px;font-size:0.88rem;color:#888;cursor:pointer;margin-bottom:14px">
+        <input type="checkbox" id="chk-non-trouves" style="width:16px;height:16px;cursor:pointer;accent-color:#ff6b6b">
+        Supprimer aussi les articles non trouvés
+      </label>
+      <button class="btn-valider" style="background:linear-gradient(135deg,#ff6b6b,#ee5a24);margin-bottom:8px" onclick="effacerCoches()">🗑️ Supprimer les produits achetés</button>
+      <button class="btn-modal-fermer" style="background:#f0f0f0;color:#555" onclick="annulerEffacement()">Annuler</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- MODAL EDIT ARTICLE -->
+<div class="modal-overlay" id="modal-edit-article">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-titre">
+      <span style="font-size:1.4rem">✏️</span>
+      <h2>Modifier l'article</h2>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Nom de l'article</label>
+      <input class="form-input" type="text" id="edit-article-nom" placeholder="Ex: Lait entier">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Enseigne</label>
+      <select class="form-input" id="edit-article-enseigne"></select>
+    </div>
+    <div class="sep"></div>
+    <button class="btn-valider" onclick="validerArticleEdit()">Enregistrer</button>
+    <button class="btn-modal-fermer" style="background:#f0f0f0;color:#555;margin-top:8px" onclick="fermerModal('modal-edit-article')">Annuler</button>
+  </div>
+</div>
+
+<!-- MODAL CONFIRMATION SUPPRESSION -->
+<div class="modal-overlay" id="modal-confirm-suppr">
+  <div class="modal" style="text-align:center">
+    <div class="modal-handle"></div>
+    <div style="font-size:2rem;margin-bottom:8px">🗑️</div>
+    <h2 style="margin-bottom:8px">Supprimer ?</h2>
+    <p id="confirm-suppr-txt" style="color:#888;margin-bottom:20px;font-size:0.95rem"></p>
+    <button class="btn-valider" style="background:linear-gradient(135deg,#ff6b6b,#ee5a24)" onclick="confirmerSuppression()">Supprimer</button>
+    <button class="btn-modal-fermer" style="background:#f0f0f0;color:#555;margin-top:8px" onclick="fermerModal('modal-confirm-suppr')">Annuler</button>
+  </div>
+</div>
+
+<!-- MODAL EDIT ENSEIGNE -->
+<div class="modal-overlay" id="modal-edit-enseigne">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-titre">
+      <span style="font-size:1.4rem">✏️</span>
+      <h2 id="modal-edit-titre">Enseigne</h2>
+    </div>
+
+    <!-- Aperçu en temps réel -->
+    <div id="apercu-tuile" style="border-radius:16px;height:80px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;transition:all 0.2s">
+      <span id="apercu-nom" style="font-family:'Oswald',sans-serif;font-weight:700;letter-spacing:2px;text-transform:uppercase;text-shadow:2px 3px 6px rgba(0,0,0,0.35),0 1px 2px rgba(0,0,0,0.25)"></span>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Nom du magasin</label>
+      <input class="form-input" type="text" id="edit-nom" placeholder="Ex: Carrefour" oninput="majApercu()">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Couleur de fond</label>
+      <div class="color-picker-row" id="color-picker-fond">
+        <div class="color-swatch active" style="background:#FF6B9D" data-color="#FF6B9D" onclick="choisirCouleur(this)"></div>
+        <div class="color-swatch" style="background:#FF9A6C" data-color="#FF9A6C" onclick="choisirCouleur(this)"></div>
+        <div class="color-swatch" style="background:#FFD93D" data-color="#FFD93D" onclick="choisirCouleur(this)"></div>
+        <div class="color-swatch" style="background:#43e97b" data-color="#43e97b" onclick="choisirCouleur(this)"></div>
+        <div class="color-swatch" style="background:#38bdf8" data-color="#38bdf8" onclick="choisirCouleur(this)"></div>
+        <div class="color-swatch" style="background:#818cf8" data-color="#818cf8" onclick="choisirCouleur(this)"></div>
+        <div class="color-swatch" style="background:#f472b6" data-color="#f472b6" onclick="choisirCouleur(this)"></div>
+        <div class="color-swatch" style="background:#fb923c" data-color="#fb923c" onclick="choisirCouleur(this)"></div>
+        <div class="color-swatch" style="background:#34d399" data-color="#34d399" onclick="choisirCouleur(this)"></div>
+        <div class="color-swatch" style="background:#2dd4bf" data-color="#2dd4bf" onclick="choisirCouleur(this)"></div>
+        <input type="color" id="custom-color" title="Couleur personnalisée" oninput="choisirCouleurCustom(this.value)">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Couleur du texte</label>
+      <div id="color-picker-texte" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <div class="color-swatch active" style="background:#ffffff;border:2px solid #ddd" data-texte="#ffffff" onclick="choisirCouleurTexte(this)"></div>
+        <div class="color-swatch" style="background:#1a1a1a" data-texte="#1a1a1a" onclick="choisirCouleurTexte(this)"></div>
+        <div class="color-swatch" style="background:#FFD93D" data-texte="#FFD93D" onclick="choisirCouleurTexte(this)"></div>
+        <div class="color-swatch" style="background:#FF6B9D" data-texte="#FF6B9D" onclick="choisirCouleurTexte(this)"></div>
+        <div class="color-swatch" style="background:#43e97b" data-texte="#43e97b" onclick="choisirCouleurTexte(this)"></div>
+        <div class="color-swatch" style="background:#38bdf8" data-texte="#38bdf8" onclick="choisirCouleurTexte(this)"></div>
+        <div class="color-swatch" style="background:#818cf8" data-texte="#818cf8" onclick="choisirCouleurTexte(this)"></div>
+        <input type="color" id="custom-texte-color" value="#ffffff" title="Couleur personnalisée" oninput="choisirCouleurTexteCustom(this.value)">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Taille du texte</label>
+      <div style="display:flex;align-items:center;gap:12px;justify-content:center">
+        <button onclick="changerTaille(-0.1)" style="width:40px;height:40px;border-radius:50%;border:2px solid #eee;background:white;font-size:1.4rem;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#555">−</button>
+        <span id="fontsize-label" style="font-size:1.1rem;font-weight:900;color:#333;min-width:45px;text-align:center">1.4</span>
+        <button onclick="changerTaille(0.1)" style="width:40px;height:40px;border-radius:50%;border:2px solid #eee;background:white;font-size:1.4rem;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#555">+</button>
+      </div>
+    </div>
+
+    <div class="sep"></div>
+    <button class="btn-valider" onclick="validerEnseigneEdit()">Enregistrer</button>
+    <button class="btn-modal-fermer" style="background:#f0f0f0;color:#555;margin-top:8px" onclick="fermerModal('modal-edit-enseigne')">Annuler</button>
+  </div>
+</div>
+
+<script>
+// ===================== ÉTAT =====================
+const DEFAUT_ENSEIGNES = [
+  { id: 'e1', nom: 'Supermarché', lettre: 'S', couleur: '#38bdf8', texteCouleur: '#ffffff', logoType: 'lettre', logoData: null },
+  { id: 'e2', nom: 'Boulangerie', lettre: 'B', couleur: '#fb923c', texteCouleur: '#ffffff', logoType: 'lettre', logoData: null },
+  { id: 'e3', nom: 'Bio & Frais', lettre: 'B', couleur: '#43e97b', texteCouleur: '#ffffff', logoType: 'lettre', logoData: null },
+];
+const DEFAUT_ARTICLES = [
+  { id: 'a1', nom: 'Lait entier', enseigneId: 'e1' },
+  { id: 'a2', nom: 'Pain de campagne', enseigneId: 'e2' },
+  { id: 'a3', nom: 'Tomates cerises', enseigneId: 'e3' },
+];
+
+function charger(cle, defaut) {
+  try {
+    const val = localStorage.getItem(cle);
+    return val ? JSON.parse(val) : defaut;
+  } catch(e) { return defaut; }
+}
+function sauvegarder() {
+  try {
+    localStorage.setItem('mc_enseignes', JSON.stringify(enseignes));
+    localStorage.setItem('mc_articles', JSON.stringify(articles));
+    localStorage.setItem('mc_ordre', JSON.stringify(ordreMagasins));
+    localStorage.setItem('mc_barre', JSON.stringify(barre));
+  } catch(e) {}
+}
+
+// Migration propre : on nettoie les champs parasites au chargement
+const raw_enseignes = charger('mc_enseignes', DEFAUT_ENSEIGNES);
+let enseignes = raw_enseignes.map(e => ({
+  id: e.id,
+  nom: e.nom,
+  couleur: e.couleur || '#888888',
+  texteCouleur: e.texteCouleur || '#ffffff',
+  fontSize: e.fontSize || 1.4
+}));
+let articles = charger('mc_articles', DEFAUT_ARTICLES);
+let ordreMagasins = charger('mc_ordre', enseignes.map(e => e.id));
+let barre = charger('mc_barre', {});
+// Sauvegarder la migration propre immédiatement
+try { localStorage.setItem('mc_enseignes', JSON.stringify(enseignes)); } catch(e) {}
+
+// Edit enseigne
+let editEnseigneId = null;
+let editCouleurSelectionnee = '#FF6B9D';
+let editTexteCouleur = '#ffffff';
+let editFontSize = 1.4;
+let editLogoOpt = 'lettre';
+let editLogoBase64 = null;
+
+// Cartes ouvertes
+let carteOuverte = null; // 'liste' | 'reglages' | null
+
+// ===================== RENDU =====================
+function render() {
+  const grille = document.getElementById('grille');
+  grille.innerHTML = '';
+
+  // 1. Carte liste
+  grille.appendChild(creerCarteListe());
+
+  // 2. Cartes magasins (triées par nb d'articles croissant)
+  const ordreTrié = [...ordreMagasins].sort((a, b) => {
+    const nbA = articles.filter(x => x.enseigneId === a).length;
+    const nbB = articles.filter(x => x.enseigneId === b).length;
+    return nbB - nbA;
+  });
+  ordreTrié.forEach((id, idx) => {
+    const e = enseignes.find(x => x.id === id);
+    const nb = articles.filter(a => a.enseigneId === id).length;
+    if (e && nb > 0) grille.appendChild(creerCarteMagasin(e, idx));
+  });
+
+  // 3. Carte Ajout enseigne (toujours en dernier)
+  grille.appendChild(creerCarteReglages());
+
+  initDrag();
+}
+
+function logoHTML(e, size = 56, radius = 14) {
+  // Upload utilisateur : on garde
+  if (e.logoType === 'upload' && e.logoData) {
+    return `<div class="carte-logo" style="width:${size}px;height:${size}px;border-radius:${radius}px;background:white;border:1.5px solid #eee;padding:4px"><img src="${e.logoData}" alt="${e.nom}" style="width:100%;height:100%;object-fit:contain;border-radius:${radius-2}px"></div>`;
+  }
+  // Initiale stylisée
+  const lettre = (e.lettre || e.nom[0] || '?').toUpperCase();
+  const bg = e.couleur || '#888';
+  const tc = e.texteCouleur || '#fff';
+  const fontSize = Math.round(size * 0.45);
+  const fs = e.fontSize || 1.4;
+  return `<div class="carte-logo" style="width:${size}px;height:${size}px;border-radius:${radius}px;background:${bg}"></div>`;
+}
+
+function creerCarteListe() {
+  const div = document.createElement('div');
+  div.className = 'carte carte-liste' + (carteOuverte === 'liste' ? ' ouverte' : '');
+  div.id = 'carte-liste';
+  const total = articles.length;
+
+  div.innerHTML = `
+    <div class="carte-header" onclick="toggleCarte('liste')">
+      <div class="carte-logo" style="background:linear-gradient(135deg,#FF6B9D,#FF9A6C);color:white;font-size:1.5rem">📝</div>
+      <div class="carte-nom">Ma liste de courses</div>
+      ${total > 0 ? `<div class="badge">${total}</div>` : ''}
+    </div>
+    <div class="corps-liste" id="corps-liste">
+      <div id="liste-articles">${renderArticles()}</div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">
+        <input type="text" id="input-article" placeholder="Ajouter un article…" onkeydown="if(event.key==='Enter')ajouterArticle()" style="width:100%;border:2px solid #eee;border-radius:12px;padding:11px 14px;font-family:'Nunito',sans-serif;font-size:0.92rem;outline:none;">
+        <div style="display:flex;gap:8px">
+          <select id="select-enseigne" style="flex:1;border:2px solid #eee;border-radius:12px;padding:10px;font-family:'Nunito',sans-serif;font-size:0.85rem;outline:none;background:white;color:#444;">${optionsEnseignes()}</select>
+          <button class="btn" onclick="ajouterArticle()" style="padding:10px 22px;font-size:1rem">Ajouter</button>
+        </div>
+      </div>
+    </div>
+  `;
+  return div;
+}
+
+function optionsEnseignes() {
+  return enseignes.map(e => `<option value="${e.id}">${e.nom}</option>`).join('');
+}
+
+function renderArticles() {
+  if (articles.length === 0) return '<div class="vide">Aucun article pour l\'instant 😊</div>';
+  return articles.map(a => {
+    const e = enseignes.find(x => x.id === a.enseigneId);
+    const bg = e ? e.couleur : '#eee';
+    return `
+      <div class="article-item" onclick="editerArticle('${a.id}')" style="cursor:pointer">
+        <span class="art-nom">${a.nom}</span>
+        <span class="art-enseigne">${e ? e.nom : '?'}</span>
+        <button class="btn-suppr" onclick="supprimerArticle('${a.id}')">✕</button>
+      </div>`;
+  }).join('');
+}
+
+
+function creerCarteMagasin(e, idx) {
+  const div = document.createElement('div');
+  div.className = 'carte carte-magasin';
+  div.setAttribute('data-enseigne-id', e.id);
+  div.setAttribute('draggable', 'true');
+  const nb = articles.filter(a => a.enseigneId === e.id).length;
+  const bg = e.couleur || '#888';
+  const tc = e.texteCouleur || '#fff';
+  div.style.background = bg;
+  div.innerHTML = `
+    <div class="carte-header" style="position:relative;background:transparent;min-height:120px" onclick="ouvrirCoursesEnseigne('${e.id}')">
+      <div style="font-family:'Oswald',sans-serif;font-weight:700;font-size:${e.fontSize || 1.4}rem;letter-spacing:2px;text-transform:uppercase;color:${tc};text-align:center;line-height:1.3;text-shadow:2px 3px 6px rgba(0,0,0,0.35),0 1px 2px rgba(0,0,0,0.25);padding:0 8px">${e.nom}</div>
+      ${nb > 0 ? `<div class="badge" style="background:rgba(0,0,0,0.25);color:${tc}">${nb}</div>` : ''}
+    </div>
+  `;
+  return div;
+}
+
+function creerCarteReglages() {
+  const div = document.createElement('div');
+  div.className = 'carte carte-reglages' + (carteOuverte === 'reglages' ? ' ouverte' : '');
+  div.innerHTML = `
+    <div class="carte-header" onclick="toggleCarte('reglages')">
+      <div class="carte-nom">Ajout enseigne</div>
+    </div>
+    <div class="corps-reglages">
+      <div class="section-titre">Enseignes</div>
+      ${enseignes.map(e => creerEnseigneRowHTML(e)).join('')}
+      <button class="btn-add-enseigne" onclick="ajouterEnseigne()">＋ Ajouter une enseigne</button>
+    </div>
+  `;
+  return div;
+}
+
+function creerEnseigneRowHTML(e) {
+  const tc = e.texteCouleur || '#fff';
+  const bg = e.couleur || '#888';
+  return `
+    <div class="enseigne-row" style="background:${bg};border-radius:12px;justify-content:center;position:relative;padding:10px 48px 10px 48px">
+      <span class="enseigne-nom" style="color:${tc};text-align:center;font-family:'Oswald',sans-serif;font-weight:700;letter-spacing:1px;text-transform:uppercase">${e.nom}</span>
+      <div style="position:absolute;right:8px;top:50%;transform:translateY(-50%);display:flex;gap:4px">
+        <button class="btn-small btn-edit" onclick="editEnseigne('${e.id}');event.stopPropagation()" style="background:rgba(255,255,255,0.25);color:${tc};border:none">✏️</button>
+        <button class="btn-small btn-suppr-e" onclick="supprimerEnseigne('${e.id}');event.stopPropagation()" style="background:rgba(255,255,255,0.25);color:${tc};border:none">✕</button>
+      </div>
+    </div>`;
+}
+
+// ===================== ACTIONS =====================
+function toggleCarte(type) {
+  if (carteOuverte === type) {
+    carteOuverte = null;
+  } else {
+    carteOuverte = type;
+  }
+  render();
+  if (carteOuverte) {
+    setTimeout(() => {
+      const id = carteOuverte === 'liste' ? 'carte-liste' : document.querySelector('.carte-reglages');
+      if (id && typeof id === 'string') {
+        const el = document.getElementById(id);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }, 50);
+  }
+}
+
+function ajouterArticle() {
+  const input = document.getElementById('input-article');
+  const sel = document.getElementById('select-enseigne');
+  const nom = input.value.trim();
+  if (!nom) return;
+  articles.push({ id: 'a' + Date.now(), nom, enseigneId: sel.value });
+  sauvegarder();
+  input.value = '';
+  input.focus();
+  // Mise à jour partielle
+  document.getElementById('liste-articles').innerHTML = renderArticles();
+  // Mettre à jour badge
+  const badge = document.querySelector('#carte-liste .badge');
+  const total = articles.length;
+  if (badge) badge.textContent = total;
+  else if (total > 0) {
+    const h = document.querySelector('#carte-liste .carte-header');
+    const b = document.createElement('div');
+    b.className = 'badge';
+    b.textContent = total;
+    h.appendChild(b);
+  }
+  // Re-render pour les cartes magasins (badges)
+  render();
+  // Rester sur la liste
+  carteOuverte = 'liste';
+  render();
+}
+
+function supprimerArticle(id) {
+  articles = articles.filter(a => a.id !== id);
+  sauvegarder();
+  render();
+  carteOuverte = 'liste';
+  render();
+}
+
+// Modal "je pars"
+function ouvrirChoixEnseigne() {
+  const grid = document.getElementById('enseigne-choix-grid');
+  grid.innerHTML = enseignes.map(e => {
+    const tc = e.texteCouleur || '#fff';
+    const bg = e.couleur || '#888';
+    const nb = articles.filter(a => a.enseigneId === e.id).length;
+    return `
+      <button class="enseigne-choix-btn" onclick="ouvrirCoursesEnseigne('${e.id}');fermerModal('modal-choix')" style="background:${bg};color:${tc}">
+        <span style="font-family:'Oswald',sans-serif;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:${tc}">${e.nom}</span>
+        <span style="font-size:0.75rem;color:${tc};opacity:0.8;font-weight:700">${nb} article${nb>1?'s':''}</span>
+      </button>`;
+  }).join('');
+  ouvrirModal('modal-choix');
+}
+
+function ouvrirCoursesEnseigne(enseigneId) {
+  const e = enseignes.find(x => x.id === enseigneId);
+  if (!e) return;
+  const arts = articles.filter(a => a.enseigneId === enseigneId);
+
+  // titre
+  const bg = e.couleur || '#888';
+  const tc = e.texteCouleur || '#fff';
+  const mtitre = document.getElementById('modal-courses-titre');
+  mtitre.style.background = bg;
+  mtitre.style.borderRadius = '12px';
+  mtitre.style.padding = '12px 16px';
+  mtitre.style.marginBottom = '16px';
+  mtitre.style.justifyContent = 'center';
+  mtitre.dataset.enseigneId = enseigneId;
+  mtitre.innerHTML = `<h2 style="font-family:'Oswald',sans-serif;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:${tc};margin:0">${e.nom}</h2>`;
+
+  if (arts.length === 0) {
+    document.getElementById('modal-courses-liste').innerHTML = '<div class="modal-vide">Aucun article pour ce magasin 🎉</div>';
+  } else {
+    document.getElementById('modal-courses-liste').innerHTML = arts.map(a => {
+      const isBarre = barre[a.id];
+      return `
+        <div class="modal-article ${isBarre ? 'barre' : ''}" id="ma-${a.id}" data-art-id="${a.id}" onclick="toggleBarre('${a.id}')">
+          <span class="modal-art-nom" style="text-decoration:${isBarre ? 'line-through' : 'none'}">${a.nom}</span>
+          <span class="modal-art-drag" onpointerdown="artDragStart(event,'${a.id}')" onclick="event.stopPropagation()">☰</span>
+        </div>`;
+    }).join('');
+    initArticleDrag();
+  }
+
+  const coches = arts.filter(a => barre[a.id]);
+  const btnEffacer = document.getElementById('btn-effacer-coches');
+  if (btnEffacer) btnEffacer.style.display = coches.length > 0 ? 'block' : 'none';
+  ouvrirModal('modal-courses');
+}
+
+function toggleBarre(id) {
+  barre[id] = !barre[id];
+  sauvegarder();
+  const el = document.getElementById('ma-' + id);
+  if (!el) return;
+  el.classList.toggle('barre', barre[id]);
+  const nom = el.querySelector('.modal-art-nom');
+  if (nom) nom.style.textDecoration = barre[id] ? 'line-through' : '';
+  // Mettre à jour visibilité bouton effacer
+  const ensId = document.getElementById('modal-courses-titre').dataset.enseigneId;
+  const arts = articles.filter(a => a.enseigneId === ensId);
+  const hasCoche = arts.some(a => barre[a.id]);
+  const btnE = document.getElementById('btn-effacer-coches');
+  if (btnE) btnE.style.display = hasCoche ? 'block' : 'none';
+}
+
+
+// Édition article
+let editArticleId = null;
+
+function editerArticle(id) {
+  const a = articles.find(x => x.id === id);
+  if (!a) return;
+  editArticleId = id;
+  document.getElementById('edit-article-nom').value = a.nom;
+  // Remplir le select enseignes
+  const sel = document.getElementById('edit-article-enseigne');
+  sel.innerHTML = enseignes.map(e => `<option value="${e.id}" ${e.id === a.enseigneId ? 'selected' : ''}>${e.nom}</option>`).join('');
+  ouvrirModal('modal-edit-article');
+}
+
+function validerArticleEdit() {
+  const nom = document.getElementById('edit-article-nom').value.trim();
+  if (!nom) return;
+  const enseigneId = document.getElementById('edit-article-enseigne').value;
+  const idx = articles.findIndex(a => a.id === editArticleId);
+  if (idx > -1) {
+    articles[idx] = { ...articles[idx], nom, enseigneId };
+    sauvegarder();
+  }
+  fermerModal('modal-edit-article');
+  carteOuverte = 'liste';
+  render();
+}
+
+// Ajout enseigne enseignes
+function editEnseigne(id) {
+  const e = enseignes.find(x => x.id === id) || null;
+  editEnseigneId = id || null;
+
+  if (e) {
+    document.getElementById('modal-edit-titre').textContent = 'Modifier ' + e.nom;
+    document.getElementById('edit-nom').value = e.nom;
+    editCouleurSelectionnee = e.couleur || '#FF6B9D';
+    editTexteCouleur = e.texteCouleur || '#ffffff';
+    editFontSize = e.fontSize || 1.4;
+  } else {
+    document.getElementById('modal-edit-titre').textContent = 'Nouvelle enseigne';
+    document.getElementById('edit-nom').value = '';
+    editCouleurSelectionnee = '#FF6B9D';
+    editTexteCouleur = '#ffffff';
+    editFontSize = 1.4;
+  }
+
+  // Swatches fond
+  document.querySelectorAll('#color-picker-fond [data-color]').forEach(s => {
+    s.classList.toggle('active', s.dataset.color === editCouleurSelectionnee);
+  });
+  // Swatches texte
+  document.querySelectorAll('#color-picker-texte [data-texte]').forEach(s => {
+    s.classList.toggle('active', s.dataset.texte === editTexteCouleur);
+  });
+  // Slider
+  const fsLbl = document.getElementById('fontsize-label'); if (fsLbl) fsLbl.textContent = editFontSize.toFixed(1);
+
+  ouvrirModal('modal-edit-enseigne');
+  setTimeout(majApercu, 50);
+}
+
+function ajouterEnseigne() {
+  editEnseigne(null);
+}
+
+let enseigneASupprimer = null;
+let enseigneCourseActive = null;
+
+function effacerCoches() {
+  const ensId = document.getElementById('modal-courses-titre').dataset.enseigneId;
+  const arts = articles.filter(a => a.enseigneId === ensId);
+  const coches = arts.filter(a => barre[a.id]);
+  const supprimerNonTrouves = document.getElementById('chk-non-trouves').checked;
+
+  // Supprimer les cochés
+  coches.forEach(a => {
+    articles = articles.filter(x => x.id !== a.id);
+    delete barre[a.id];
+  });
+
+  // Supprimer les non cochés si case cochée
+  if (supprimerNonTrouves) {
+    const autres = articles.filter(a => a.enseigneId === ensId && !barre[a.id]);
+    autres.forEach(a => { articles = articles.filter(x => x.id !== a.id); });
+  }
+
+  sauvegarder();
+  fermerModal('modal-courses');
+  render();
+}
+
+function ajouterDepuisModal() {
+  const input = document.getElementById('modal-cours-input');
+  const nom = input.value.trim();
+  if (!nom) return;
+  const ensId = document.getElementById('modal-courses-titre').dataset.enseigneId;
+  articles.push({ id: 'a' + Date.now(), nom, enseigneId: ensId });
+  sauvegarder();
+  input.value = '';
+  input.focus();
+  // Rafraîchir la liste dans le modal
+  ouvrirCoursesEnseigne(ensId);
+  // Revenir en haut de la liste
+  const liste = document.getElementById('modal-courses-liste');
+  if (liste) liste.scrollTop = 0;
+}
+
+function annulerEffacement() {
+  document.getElementById('chk-non-trouves').checked = false;
+  document.getElementById('btn-effacer-coches').style.display = 'none';
+}
+function supprimerEnseigne(id) {
+  enseigneASupprimer = id;
+  const e = enseignes.find(x => x.id === id);
+  document.getElementById('confirm-suppr-txt').textContent = e ? `Supprimer "${e.nom}" et tous ses articles ?` : 'Confirmer la suppression ?';
+  ouvrirModal('modal-confirm-suppr');
+}
+function confirmerSuppression() {
+  const modal = document.getElementById('modal-confirm-suppr');
+  if (modal.dataset.mode === 'autres') {
+    const ensId = modal.dataset.ensId;
+    articles = articles.filter(a => a.enseigneId !== ensId);
+    sauvegarder();
+    modal.dataset.mode = '';
+    fermerModal('modal-confirm-suppr');
+    render();
+    return;
+  }
+  if (!enseigneASupprimer) return;
+  enseignes = enseignes.filter(e => e.id !== enseigneASupprimer);
+  ordreMagasins = ordreMagasins.filter(i => i !== enseigneASupprimer);
+  articles = articles.filter(a => a.enseigneId !== enseigneASupprimer);
+  enseigneASupprimer = null;
+  sauvegarder();
+  fermerModal('modal-confirm-suppr');
+  carteOuverte = 'reglages';
+  render();
+}
+
+function choisirCouleur(el) {
+  editCouleurSelectionnee = el.dataset.color;
+  document.querySelectorAll('#color-picker-fond [data-color]').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+  majApercu();
+}
+
+function choisirCouleurCustom(val) {
+  editCouleurSelectionnee = val;
+  document.querySelectorAll('#color-picker-fond [data-color]').forEach(s => s.classList.remove('active'));
+  majApercu();
+}
+
+function choisirCouleurTexte(el) {
+  editTexteCouleur = el.dataset.texte;
+  document.querySelectorAll('#color-picker-texte [data-texte]').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+  majApercu();
+}
+
+function choisirCouleurTexteCustom(val) {
+  editTexteCouleur = val;
+  document.querySelectorAll('#color-picker-texte [data-texte]').forEach(s => s.classList.remove('active'));
+  majApercu();
+}
+
+function changerTaille(delta) {
+  editFontSize = Math.round((editFontSize + delta) * 10) / 10;
+  editFontSize = Math.min(2.5, Math.max(0.6, editFontSize));
+  const lbl = document.getElementById('fontsize-label');
+  if (lbl) lbl.textContent = editFontSize.toFixed(1);
+  majApercu();
+}
+
+function majApercu() {
+  const nomEl = document.getElementById('edit-nom');
+  if (!nomEl) return;
+  const nom = nomEl.value || 'Aperçu';
+  const fs = editFontSize;
+  const apercu = document.getElementById('apercu-tuile');
+  if (!apercu) return;
+  apercu.style.background = editCouleurSelectionnee;
+  const span = document.getElementById('apercu-nom');
+  if (!span) return;
+  span.textContent = nom;
+  span.style.color = editTexteCouleur;
+  span.style.fontSize = fs + 'rem';
+  const lbl = document.getElementById('fontsize-label');
+  if (lbl) lbl.textContent = fs.toFixed(1);
+}
+
+function validerEnseigneEdit() {
+  const nom = document.getElementById('edit-nom').value.trim();
+  if (!nom) { alert('Merci de saisir un nom.'); return; }
+  const fontSize = editFontSize;
+
+  if (editEnseigneId) {
+    const idx = enseignes.findIndex(e => e.id === editEnseigneId);
+    if (idx > -1) {
+      enseignes[idx] = { ...enseignes[idx], nom, couleur: editCouleurSelectionnee, texteCouleur: editTexteCouleur, fontSize };
+    }
+  } else {
+    const newId = 'e' + Date.now();
+    enseignes.push({ id: newId, nom, couleur: editCouleurSelectionnee, texteCouleur: editTexteCouleur, fontSize });
+    ordreMagasins.push(newId);
+  }
+  sauvegarder();
+  fermerModal('modal-edit-enseigne');
+  carteOuverte = 'reglages';
+  render();
+}
+
+
+// ===================== DRAG ARTICLES MODAL =====================
+let artDragSrcId = null;
+let artDragEl = null;
+let artDragClone = null;
+let artDragStartY = 0;
+let artLongPressTimer = null;
+let artDragActive = false;
+
+function initArticleDrag() {
+  // Rien à faire, les events sont inline sur les poignées
+}
+
+function artDragStart(e, id) {
+  e.preventDefault();
+  artDragSrcId = id;
+  artDragEl = document.getElementById('ma-' + id);
+  artDragStartY = e.clientY || (e.touches && e.touches[0].clientY) || 0;
+  artDragActive = false;
+
+  artLongPressTimer = setTimeout(() => {
+    artDragActive = true;
+    if (navigator.vibrate) navigator.vibrate(40);
+    artDragEl.classList.add('dragging-art');
+
+    // Clone visuel
+    const rect = artDragEl.getBoundingClientRect();
+    artDragClone = artDragEl.cloneNode(true);
+    artDragClone.style.cssText = `position:fixed;left:${rect.left}px;top:${rect.top}px;width:${rect.width}px;opacity:0.85;z-index:9999;pointer-events:none;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,0.2);background:white`;
+    document.body.appendChild(artDragClone);
+  }, 200);
+
+  document.addEventListener('pointermove', artDragMove, {passive:false});
+  document.addEventListener('pointerup', artDragEnd);
+  document.addEventListener('pointercancel', artDragEnd);
+}
+
+function artDragMove(e) {
+  if (!artDragActive) return;
+  e.preventDefault();
+  const y = e.clientY;
+
+  // Annuler si on sort du modal
+  const modal = document.querySelector('#modal-courses .modal');
+  if (modal) {
+    const mr = modal.getBoundingClientRect();
+    if (e.clientX < mr.left || e.clientX > mr.right || y < mr.top || y > mr.bottom) {
+      artDragEnd(e);
+      return;
+    }
+  }
+
+  if (artDragClone) {
+    const rect = artDragEl.getBoundingClientRect();
+    artDragClone.style.top = (y - rect.height/2) + 'px';
+  }
+
+  // Auto-scroll quand on approche des bords de la liste
+  const liste = document.getElementById('modal-courses-liste');
+  if (liste) {
+    const lr = liste.getBoundingClientRect();
+    const zone = 60;
+    const speed = 8;
+    if (y < lr.top + zone) liste.scrollTop -= speed;
+    else if (y > lr.bottom - zone) liste.scrollTop += speed;
+  }
+
+  // Trouver l'élément cible
+  document.querySelectorAll('.modal-article').forEach(el => el.classList.remove('drag-over-art'));
+  if (artDragClone) artDragClone.style.display = 'none';
+  const target = document.elementFromPoint(e.clientX, y);
+  if (artDragClone) artDragClone.style.display = '';
+  const targetEl = target && target.closest('.modal-article');
+  if (targetEl && targetEl !== artDragEl) {
+    targetEl.classList.add('drag-over-art');
+  }
+}
+
+function artDragEnd(e) {
+  clearTimeout(artLongPressTimer);
+  document.removeEventListener('pointermove', artDragMove);
+  document.removeEventListener('pointerup', artDragEnd);
+  document.removeEventListener('pointercancel', artDragEnd);
+
+  if (artDragClone) { artDragClone.remove(); artDragClone = null; }
+  document.querySelectorAll('.modal-article').forEach(el => el.classList.remove('drag-over-art', 'dragging-art'));
+
+  if (!artDragActive) { artDragActive = false; return; }
+  artDragActive = false;
+
+  const y = e.clientY;
+  const targetEl = (() => {
+    if (artDragClone) return null;
+    const tmp = document.elementFromPoint(e.clientX, y);
+    return tmp && tmp.closest('.modal-article');
+  })();
+
+  // Chercher la cible via position Y
+  let best = null;
+  document.querySelectorAll('.modal-article').forEach(el => {
+    if (el === artDragEl) return;
+    const r = el.getBoundingClientRect();
+    if (y >= r.top && y <= r.bottom) best = el;
+  });
+
+  if (best) {
+    const targetId = best.dataset.artId;
+    const ensId = document.getElementById('modal-courses-titre').dataset.enseigneId;
+    const ensArts = articles.filter(a => a.enseigneId === ensId);
+    const otherArts = articles.filter(a => a.enseigneId !== ensId);
+    const si = ensArts.findIndex(a => a.id === artDragSrcId);
+    const ti = ensArts.findIndex(a => a.id === targetId);
+    if (si !== -1 && ti !== -1 && si !== ti) {
+      const [moved] = ensArts.splice(si, 1);
+      ensArts.splice(ti, 0, moved);
+      articles = [...otherArts, ...ensArts];
+      sauvegarder();
+      ouvrirCoursesEnseigne(ensId);
+    }
+  }
+  artDragSrcId = null;
+  artDragEl = null;
+}
+
+// ===================== MODAUX =====================
+function ouvrirModal(id) {
+  document.getElementById(id).classList.add('visible');
+}
+function fermerModal(id) {
+  document.getElementById(id).classList.remove('visible');
+}
+// Fermer en cliquant l'overlay
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', function(e) {
+    if (e.target === this) fermerModal(this.id);
+  });
+});
+
+// ===================== DRAG & DROP =====================
+let dragSrcId = null;
+
+function initDrag() {
+  const cartes = document.querySelectorAll('.carte-magasin');
+  cartes.forEach(carte => {
+    carte.addEventListener('dragstart', onDragStart);
+    carte.addEventListener('dragover', onDragOver);
+    carte.addEventListener('drop', onDrop);
+    carte.addEventListener('dragend', onDragEnd);
+    // Touch
+    carte.addEventListener('touchstart', onTouchStart, { passive: true });
+    carte.addEventListener('touchmove', onTouchMove, { passive: false });
+    carte.addEventListener('touchend', onTouchEnd);
+    carte.addEventListener('touchcancel', onTouchEnd);
+  });
+}
+
+function onDragStart(e) {
+  dragSrcId = this.getAttribute('data-enseigne-id');
+  this.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+}
+function onDragOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  document.querySelectorAll('.carte-magasin').forEach(c => c.classList.remove('drag-over'));
+  this.classList.add('drag-over');
+}
+function onDrop(e) {
+  e.preventDefault();
+  const targetId = this.getAttribute('data-enseigne-id');
+  if (dragSrcId && targetId && dragSrcId !== targetId) {
+    const si = ordreMagasins.indexOf(dragSrcId);
+    const ti = ordreMagasins.indexOf(targetId);
+    if (si > -1 && ti > -1) {
+      ordreMagasins.splice(si, 1);
+      ordreMagasins.splice(ti, 0, dragSrcId);
+      sauvegarder();
+      render();
+      carteOuverte = carteOuverte; // keep
+    }
+  }
+  document.querySelectorAll('.carte-magasin').forEach(c => c.classList.remove('drag-over'));
+}
+function onDragEnd() {
+  this.classList.remove('dragging');
+  document.querySelectorAll('.carte-magasin').forEach(c => c.classList.remove('drag-over'));
+}
+
+// Touch drag — activé uniquement après un long press (~220ms)
+let touchDragId = null, touchClone = null, touchLastOver = null;
+let touchDragActive = false;
+let longPressTimer = null;
+let longPressEl = null;
+let touchStartX = 0, touchStartY = 0;
+const LONG_PRESS_DELAY = 220; // ms
+const LONG_PRESS_MOVE_THRESHOLD = 8; // px — annule si on bouge trop vite
+
+function onTouchStart(e) {
+  const carte = this;
+  const t = e.touches[0];
+  touchStartX = t.clientX;
+  touchStartY = t.clientY;
+  touchDragActive = false;
+  longPressEl = carte;
+
+  longPressTimer = setTimeout(() => {
+    // Démarrer le drag
+    touchDragActive = true;
+    touchDragId = carte.getAttribute('data-enseigne-id');
+    const rect = carte.getBoundingClientRect();
+    touchClone = carte.cloneNode(true);
+    touchClone.style.cssText = `position:fixed;top:${rect.top}px;left:${rect.left}px;width:${rect.width}px;opacity:0.82;pointer-events:none;z-index:9999;border-radius:22px;box-shadow:0 12px 40px rgba(0,0,0,0.28);transition:none;transform:scale(1.05);`;
+    document.body.appendChild(touchClone);
+    carte.style.opacity = '0.35';
+    // Vibration légère si supportée
+    if (navigator.vibrate) navigator.vibrate(40);
+  }, LONG_PRESS_DELAY);
+}
+
+function onTouchMove(e) {
+  const t = e.touches[0];
+  const dx = Math.abs(t.clientX - touchStartX);
+  const dy = Math.abs(t.clientY - touchStartY);
+
+  if (!touchDragActive) {
+    // Annuler le long press si le doigt a trop bougé (scroll normal)
+    if (dx > LONG_PRESS_MOVE_THRESHOLD || dy > LONG_PRESS_MOVE_THRESHOLD) {
+      clearTimeout(longPressTimer);
+      longPressTimer = null;
+    }
+    return; // Laisser le scroll se faire normalement
+  }
+
+  // Drag actif : bloquer le scroll
+  e.preventDefault();
+
+  if (touchClone) {
+    touchClone.style.left = (t.clientX - touchClone.offsetWidth / 2) + 'px';
+    touchClone.style.top  = (t.clientY - touchClone.offsetHeight / 2) + 'px';
+  }
+
+  const el = document.elementFromPoint(t.clientX, t.clientY);
+  const overCarte = el && el.closest('.carte-magasin');
+  document.querySelectorAll('.carte-magasin').forEach(c => c.classList.remove('drag-over'));
+  if (overCarte && overCarte.getAttribute('data-enseigne-id') !== touchDragId) {
+    touchLastOver = overCarte.getAttribute('data-enseigne-id');
+    overCarte.classList.add('drag-over');
+  } else {
+    touchLastOver = null;
+  }
+}
+
+function onTouchEnd(e) {
+  clearTimeout(longPressTimer);
+  longPressTimer = null;
+
+  if (longPressEl) longPressEl.style.opacity = '';
+  if (touchClone) { touchClone.remove(); touchClone = null; }
+  document.querySelectorAll('.carte-magasin').forEach(c => c.classList.remove('drag-over'));
+
+  if (touchDragActive && touchDragId && touchLastOver && touchDragId !== touchLastOver) {
+    const si = ordreMagasins.indexOf(touchDragId);
+    const ti = ordreMagasins.indexOf(touchLastOver);
+    if (si > -1 && ti > -1) {
+      ordreMagasins.splice(si, 1);
+      ordreMagasins.splice(ti, 0, touchDragId);
+      sauvegarder();
+      render();
+    }
+  }
+
+  touchDragId = null;
+  touchLastOver = null;
+  touchDragActive = false;
+  longPressEl = null;
+}
+
+
+// ===================== RECHERCHE LOGO =====================
+// Dictionnaire d'enseignes françaises connues -> domaine
+
+
+
+
+const LOGOS_INTEGRES = {
+  'carrefour': { svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#004A9F"/><polygon points="50,15 35,50 50,85 65,50" fill="#ED1C24"/><polygon points="15,50 50,35 85,50 50,65" fill="white"/></svg>', couleur: '#004A9F', nom: 'Carrefour' },
+  'leclerc': { svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#003087"/><text x="50" y="62" font-family="Arial Black" font-size="42" font-weight="900" fill="#E2001A" text-anchor="middle">E</text><text x="50" y="82" font-family="Arial" font-size="13" font-weight="700" fill="white" text-anchor="middle">LECLERC</text></svg>', couleur: '#003087', nom: 'E.Leclerc' },
+  'lidl': { svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#0050AA"/><ellipse cx="50" cy="50" rx="35" ry="35" fill="#FFD700"/><ellipse cx="50" cy="50" rx="28" ry="28" fill="#E30613"/><text x="50" y="57" font-family="Arial Black" font-size="18" font-weight="900" fill="white" text-anchor="middle">LIDL</text></svg>', couleur: '#0050AA', nom: 'Lidl' },
+  'aldi': { svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#00529B"/><text x="50" y="52" font-family="Arial Black" font-size="26" font-weight="900" fill="white" text-anchor="middle">aldi</text><rect x="10" y="62" width="80" height="6" fill="#FF6600"/></svg>', couleur: '#00529B', nom: 'Aldi' },
+  'intermarch': { svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#E2001A"/><text x="50" y="45" font-family="Arial Black" font-size="11" font-weight="900" fill="white" text-anchor="middle">INTER</text><text x="50" y="62" font-family="Arial Black" font-size="11" font-weight="900" fill="white" text-anchor="middle">MARCHE</text><polygon points="50,68 42,80 58,80" fill="white"/></svg>', couleur: '#E2001A', nom: 'Intermarché' },
+  'auchan': { svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#E2001A"/><text x="50" y="72" font-family="Arial Black" font-size="13" font-weight="900" fill="white" text-anchor="middle">AUCHAN</text></svg>', couleur: '#E2001A', nom: 'Auchan' },
+  'super u': { svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#E2001A"/><text x="50" y="58" font-family="Arial Black" font-size="52" font-weight="900" fill="white" text-anchor="middle">U</text></svg>', couleur: '#E2001A', nom: 'Super U' },
+  'hyper u': { svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#E2001A"/><text x="50" y="58" font-family="Arial Black" font-size="52" font-weight="900" fill="white" text-anchor="middle">U</text></svg>', couleur: '#E2001A', nom: 'Hyper U' },
+  'monoprix': { svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#333333"/><text x="50" y="44" font-family="Arial" font-size="11" fill="white" text-anchor="middle">mono</text><text x="50" y="63" font-family="Arial Black" font-size="14" font-weight="900" fill="white" text-anchor="middle">PRIX</text><rect x="20" y="68" width="60" height="3" fill="#E2001A"/></svg>', couleur: '#333333', nom: 'Monoprix' },
+  'casino': { svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#009F4D"/><text x="50" y="58" font-family="Arial Black" font-size="16" font-weight="900" fill="white" text-anchor="middle">Casino</text><rect x="20" y="65" width="60" height="3" fill="#FFD700"/></svg>', couleur: '#009F4D', nom: 'Casino' },
+  'franprix': { svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#E2001A"/><text x="50" y="44" font-family="Arial Black" font-size="12" font-weight="900" fill="white" text-anchor="middle">FRAN</text><text x="50" y="62" font-family="Arial Black" font-size="12" font-weight="900" fill="white" text-anchor="middle">PRIX</text></svg>', couleur: '#E2001A', nom: 'Franprix' },
+  'picard': { svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#003087"/><text x="50" y="57" font-family="Arial Black" font-size="16" font-weight="900" fill="white" text-anchor="middle">picard</text></svg>', couleur: '#003087', nom: 'Picard' },
+  'biocoop': { svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#5BA632"/><text x="50" y="44" font-family="Arial Black" font-size="13" font-weight="900" fill="white" text-anchor="middle">BIO</text><text x="50" y="62" font-family="Arial Black" font-size="13" font-weight="900" fill="white" text-anchor="middle">COOP</text></svg>', couleur: '#5BA632', nom: 'Biocoop' },
+  'naturalia': { svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#7AB648"/><text x="50" y="57" font-family="Arial" font-size="11" fill="white" text-anchor="middle">naturalia</text></svg>', couleur: '#7AB648', nom: 'Naturalia' },
+  'grand frais': { svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#E2001A"/><text x="50" y="44" font-family="Arial Black" font-size="13" font-weight="900" fill="white" text-anchor="middle">GRAND</text><text x="50" y="62" font-family="Arial Black" font-size="13" font-weight="900" fill="white" text-anchor="middle">FRAIS</text></svg>', couleur: '#E2001A', nom: 'Grand Frais' },
+  'cora': { svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#E2001A"/><text x="50" y="60" font-family="Arial Black" font-size="28" font-weight="900" fill="white" text-anchor="middle">cora</text></svg>', couleur: '#E2001A', nom: 'Cora' },
+  'decathlon': { svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#007DC5"/><text x="50" y="44" font-family="Arial Black" font-size="9" font-weight="900" fill="white" text-anchor="middle">DECA</text><text x="50" y="62" font-family="Arial Black" font-size="9" font-weight="900" fill="white" text-anchor="middle">THLON</text></svg>', couleur: '#007DC5', nom: 'Decathlon' },
+  'leroy merlin': { svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#007A3E"/><text x="50" y="44" font-family="Arial Black" font-size="10" font-weight="900" fill="white" text-anchor="middle">LEROY</text><text x="50" y="62" font-family="Arial Black" font-size="10" font-weight="900" fill="white" text-anchor="middle">MERLIN</text></svg>', couleur: '#007A3E', nom: 'Leroy Merlin' },
+  'ikea': { svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#0058A3"/><rect x="10" y="55" width="80" height="25" fill="#FFD700"/><text x="50" y="50" font-family="Arial Black" font-size="28" font-weight="900" fill="#FFD700" text-anchor="middle">IKEA</text></svg>', couleur: '#0058A3', nom: 'IKEA' },
+  'action': { svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#E2001A"/><text x="50" y="60" font-family="Arial Black" font-size="22" font-weight="900" fill="white" text-anchor="middle">action</text></svg>', couleur: '#E2001A', nom: 'Action' },
+};
+
+function svgVersDataUrl(svgStr) {
+  return 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgStr)));
+}
+
+const LOGO_GENERIQUE = "🏪";
+
+function chercherLogo() {
+  const nom = document.getElementById('edit-nom').value.trim().toLowerCase();
+  const apercu = document.getElementById('logo-apercu');
+  apercu.style.display = 'none';
+  editLogoBase64 = null;
+
+  if (!nom) {
+    afficherApercuGenerique(apercu, 'Aucun nom saisi');
+    return;
+  }
+
+  // Chercher dans les logos intégrés
+  let logoTrouve = null;
+  for (const [cle, val] of Object.entries(LOGOS_INTEGRES)) {
+    if (nom.includes(cle)) { logoTrouve = val; break; }
+  }
+
+  if (logoTrouve) {
+    const dataUrl = svgVersDataUrl(logoTrouve.svg);
+    editLogoBase64 = dataUrl;
+    editLogoOpt = 'image';
+    apercu.innerHTML = `
+      <div class="logo-apercu-wrap">
+        <img class="logo-apercu-img" src="${dataUrl}" alt="logo" style="background:white;padding:2px">
+        <div class="logo-apercu-txt">Logo trouvé !<span>${logoTrouve.nom}</span></div>
+        <button class="btn-logo-suppr" onclick="supprimerLogoApercu()">✕ Retirer</button>
+      </div>`;
+    apercu.style.display = 'block';
+  } else {
+    afficherApercuGenerique(apercu, 'Enseigne non reconnue — logo générique utilisé');
+  }
+}
+
+function afficherApercuGenerique(apercu, msg) {
+  editLogoBase64 = 'generique';
+  editLogoOpt = 'generique';
+  apercu.innerHTML = `
+    <div class="logo-apercu-wrap">
+      <span style="font-size:2rem">${LOGO_GENERIQUE}</span>
+      <div class="logo-apercu-txt">Logo générique<span>${msg}</span></div>
+      <button class="btn-logo-suppr" onclick="supprimerLogoApercu()">✕ Retirer</button>
+    </div>`;
+  apercu.style.display = 'block';
+}
+
+function supprimerLogoApercu() {
+  editLogoBase64 = null;
+  editLogoOpt = 'lettre';
+  document.getElementById('logo-apercu').style.display = 'none';
+}
+
+
+// ===================== INIT =====================
+// Bloquer tout scroll horizontal natif
+document.addEventListener('touchstart', function(e) {
+  // Mémoriser la position X initiale
+  window._touchStartX = e.touches[0].clientX;
+  window._touchStartY = e.touches[0].clientY;
+}, { passive: true });
+
+document.addEventListener('touchmove', function(e) {
+  if (touchDragActive) { e.preventDefault(); return; }
+  const dx = Math.abs(e.touches[0].clientX - (window._touchStartX || 0));
+  const dy = Math.abs(e.touches[0].clientY - (window._touchStartY || 0));
+  // Si le mouvement est plus horizontal que vertical, bloquer
+  if (dx > dy && dx > 5) {
+    e.preventDefault();
+  }
+}, { passive: false });
+
+render();
+</script>
+</body>
+</html>
