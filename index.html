@@ -382,12 +382,14 @@
   }
   .modal-article:active { background: #f0f0f0; }
   .modal-article.barre {
-    background: #f0f0f0;
-    border-color: #e0e0e0;
+    background: #e8f5e9;
+    border-color: #43e97b;
   }
   .modal-article.barre .modal-art-nom {
     text-decoration: line-through;
-    color: #aaa;
+    text-decoration-color: #43e97b;
+    text-decoration-thickness: 2px;
+    color: #999;
   }
   .modal-art-check {
     width: 24px;
@@ -1618,28 +1620,29 @@ document.addEventListener('DOMContentLoaded', () => {
   const modalInner = modalCourses.querySelector('.modal');
 
   modalInner.addEventListener('touchstart', e => {
-    const liste = document.getElementById('modal-courses-liste');
-    // Seulement si la liste est en haut
-    if (liste && liste.scrollTop > 0) return;
     swipeStartY = e.touches[0].clientY;
   }, { passive: true });
 
   modalInner.addEventListener('touchmove', e => {
     if (swipeStartY === null) return;
+    const liste = document.getElementById('modal-courses-liste');
     const dy = e.touches[0].clientY - swipeStartY;
+    // Permettre le scroll normal si liste pas en haut
+    if (liste && liste.scrollTop > 0 && dy < 0) { swipeStartY = null; return; }
     if (dy > 0) {
+      e.preventDefault();
       modalInner.style.transform = `translateY(${dy}px)`;
       modalInner.style.transition = 'none';
     }
-  }, { passive: true });
+  }, { passive: false });
 
   modalInner.addEventListener('touchend', e => {
     if (swipeStartY === null) return;
     const dy = e.changedTouches[0].clientY - swipeStartY;
-    modalInner.style.transition = '';
-    if (dy > 100) {
-      modalInner.style.transform = '';
-      fermerModal('modal-courses');
+    modalInner.style.transition = 'transform 0.3s ease';
+    if (dy > 60) {
+      modalInner.style.transform = 'translateY(100%)';
+      setTimeout(() => fermerModal('modal-courses'), 250);
     } else {
       modalInner.style.transform = '';
     }
