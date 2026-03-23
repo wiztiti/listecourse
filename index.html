@@ -652,6 +652,9 @@
   <div class="modal">
     <div class="modal-handle"></div>
     <div class="modal-titre" id="modal-courses-titre" onclick="fermerModal('modal-courses')" style="cursor:pointer"></div>
+    <div style="font-size:0.75rem;color:#aaa;text-align:center;padding:6px 0 10px;line-height:1.6">
+      👆 Appui court : cocher / décocher &nbsp;|&nbsp; 👇 Appui long : modifier ou supprimer
+    </div>
     <div id="modal-courses-liste"></div>
     <div style="display:flex;gap:8px;margin-top:12px;flex-shrink:0">
       <input class="form-input" type="text" id="modal-cours-input" placeholder="Ajouter un produit…" style="flex:1;margin:0" onkeydown="if(event.key==='Enter')ajouterDepuisModal()">
@@ -1606,12 +1609,54 @@ function artDragEnd(e) {
   artDragEl = null;
 }
 
+
+// ===================== SWIPE DOWN POUR FERMER MODAL COURSES =====================
+let swipeStartY = null;
+
+document.addEventListener('DOMContentLoaded', () => {
+  const modalCourses = document.getElementById('modal-courses');
+  const modalInner = modalCourses.querySelector('.modal');
+
+  modalInner.addEventListener('touchstart', e => {
+    const liste = document.getElementById('modal-courses-liste');
+    // Seulement si la liste est en haut
+    if (liste && liste.scrollTop > 0) return;
+    swipeStartY = e.touches[0].clientY;
+  }, { passive: true });
+
+  modalInner.addEventListener('touchmove', e => {
+    if (swipeStartY === null) return;
+    const dy = e.touches[0].clientY - swipeStartY;
+    if (dy > 0) {
+      modalInner.style.transform = `translateY(${dy}px)`;
+      modalInner.style.transition = 'none';
+    }
+  }, { passive: true });
+
+  modalInner.addEventListener('touchend', e => {
+    if (swipeStartY === null) return;
+    const dy = e.changedTouches[0].clientY - swipeStartY;
+    modalInner.style.transition = '';
+    if (dy > 100) {
+      modalInner.style.transform = '';
+      fermerModal('modal-courses');
+    } else {
+      modalInner.style.transform = '';
+    }
+    swipeStartY = null;
+  });
+});
+
 // ===================== MODAUX =====================
 function ouvrirModal(id) {
   document.getElementById(id).classList.add('visible');
 }
 function fermerModal(id) {
   document.getElementById(id).classList.remove('visible');
+  if (id === 'modal-courses') {
+    const inner = document.querySelector('#modal-courses .modal');
+    if (inner) { inner.style.transform = ''; inner.style.transition = ''; }
+  }
 }
 // Fermer en cliquant l'overlay
 document.querySelectorAll('.modal-overlay').forEach(overlay => {
