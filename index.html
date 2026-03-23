@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -372,10 +371,10 @@
   .modal-article {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 13px 14px;
-    border-radius: 14px;
-    margin-bottom: 8px;
+    gap: 8px;
+    padding: 7px 10px;
+    border-radius: 10px;
+    margin-bottom: 4px;
     background: #f9f9f9;
     cursor: pointer;
     transition: background 0.15s;
@@ -407,7 +406,18 @@
     color: white;
     font-size: 0.8rem;
   }
-  .modal-art-nom { font-weight: 700; font-size: 0.95rem; color: #333; flex: 1; }
+  .modal-art-nom { font-weight: 700; font-size: 0.88rem; color: #333; flex: 1; }
+  .btn-enseigne-suggeree {
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: none;
+    font-size: 0.8rem;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    cursor: pointer;
+    white-space: nowrap;
+    opacity: 1 !important;
+  }
   .modal-art-drag {
     color: #ccc;
     font-size: 1.1rem;
@@ -681,6 +691,17 @@
   </div>
 </div>
 
+<!-- MODAL OPTIONS ARTICLE -->
+<div class="modal-overlay" id="modal-art-options">
+  <div class="modal" style="text-align:center">
+    <div class="modal-handle"></div>
+    <p id="modal-art-options-nom" style="font-weight:900;font-size:1.1rem;margin-bottom:20px;color:#333"></p>
+    <button class="btn-valider" style="margin-bottom:10px" onclick="modifierArticleDepuisModal()">✏️ Modifier</button>
+    <button class="btn-valider" style="background:linear-gradient(135deg,#ff6b6b,#ee5a24);margin-bottom:10px" onclick="supprimerArticleDepuisModal()">🗑️ Supprimer</button>
+    <button class="btn-modal-fermer" style="background:#f0f0f0;color:#555" onclick="fermerModal('modal-art-options')">Annuler</button>
+  </div>
+</div>
+
 <!-- MODAL CONFIRMATION SUPPRESSION -->
 <div class="modal-overlay" id="modal-confirm-suppr">
   <div class="modal" style="text-align:center">
@@ -710,6 +731,9 @@
     <div class="form-group">
       <label class="form-label">Nom du magasin</label>
       <input class="form-input" type="text" id="edit-nom" placeholder="Ex: Carrefour" oninput="majApercu()">
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px" id="enseignes-suggerees">
+        <!-- rempli par JS -->
+      </div>
     </div>
 
     <div class="form-group">
@@ -752,6 +776,13 @@
       </div>
     </div>
 
+    <div class="form-group">
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:0.95rem;color:#555;font-weight:700">
+        <input type="checkbox" id="chk-afficher-nom" style="width:18px;height:18px;cursor:pointer;accent-color:#FF6B9D">
+        Afficher le nom sur la tuile
+      </label>
+    </div>
+
     <div class="sep"></div>
     <button class="btn-valider" onclick="validerEnseigneEdit()">Enregistrer</button>
     <button class="btn-modal-fermer" style="background:#f0f0f0;color:#555;margin-top:8px" onclick="fermerModal('modal-edit-enseigne')">Annuler</button>
@@ -760,6 +791,46 @@
 
 <script>
 // ===================== ÉTAT =====================
+
+const ENSEIGNES_CONNUES = [
+  // Bricolage
+  { nom: 'Leroy Merlin',   couleur: '#78BE20', texteCouleur: '#ffffff' },
+  { nom: 'Castorama',      couleur: '#0078D4', texteCouleur: '#ffffff' },
+  { nom: 'Brico Dépôt',    couleur: '#F07800', texteCouleur: '#ffffff' },
+  { nom: 'Mr Bricolage',   couleur: '#e2001a', texteCouleur: '#ffffff' },
+  { nom: 'Bricomarché',    couleur: '#e2001a', texteCouleur: '#ffffff' },
+  // Déco / Maison
+  { nom: 'Action',         couleur: '#e2001a', texteCouleur: '#ffffff' },
+  { nom: 'Stokomani',      couleur: '#6B2D8B', texteCouleur: '#ffffff' },
+  { nom: 'Centrakor',      couleur: '#e2001a', texteCouleur: '#ffffff' },
+  { nom: 'Gifi',           couleur: '#e2001a', texteCouleur: '#ffffff' },
+  { nom: 'Babou',          couleur: '#0071BB', texteCouleur: '#ffffff' },
+  { nom: 'Bazarland',      couleur: '#e2001a', texteCouleur: '#ffffff' },
+  { nom: 'Ikea',           couleur: '#0058A3', texteCouleur: '#FFD700' },
+  // Alimentaire
+  { nom: 'Carrefour',      couleur: '#004E9F', texteCouleur: '#ffffff' },
+  { nom: 'Carrefour Market', couleur: '#004E9F', texteCouleur: '#ffffff' },
+  { nom: 'Leclerc',        couleur: '#003DA5', texteCouleur: '#FFD700' },
+  { nom: 'Lidl',           couleur: '#0050AA', texteCouleur: '#FFD700' },
+  { nom: 'Aldi',           couleur: '#00529B', texteCouleur: '#ffffff' },
+  { nom: 'Intermarché',    couleur: '#e20015', texteCouleur: '#ffffff' },
+  { nom: 'Super U',        couleur: '#e30613', texteCouleur: '#ffffff' },
+  { nom: 'Hyper U',        couleur: '#e30613', texteCouleur: '#ffffff' },
+  { nom: 'Monoprix',       couleur: '#000000', texteCouleur: '#ffffff' },
+  { nom: 'Franprix',       couleur: '#e2001a', texteCouleur: '#ffffff' },
+  { nom: 'Casino',         couleur: '#007940', texteCouleur: '#ffffff' },
+  { nom: 'Netto',          couleur: '#e30613', texteCouleur: '#ffffff' },
+  { nom: 'Picard',         couleur: '#003B8E', texteCouleur: '#ffffff' },
+  { nom: 'Biocoop',        couleur: '#4a7c2f', texteCouleur: '#ffffff' },
+  { nom: 'Naturalia',      couleur: '#6aaa3a', texteCouleur: '#ffffff' },
+  { nom: 'Grand Frais',    couleur: '#e8401c', texteCouleur: '#ffffff' },
+  { nom: 'Boulangerie',    couleur: '#c8860a', texteCouleur: '#ffffff' },
+  { nom: 'Pharmacie',      couleur: '#008752', texteCouleur: '#ffffff' },
+  { nom: 'Marché',         couleur: '#e8401c', texteCouleur: '#ffffff' },
+  { nom: 'Primeur',        couleur: '#4a7c2f', texteCouleur: '#ffffff' },
+  { nom: 'Boucherie',      couleur: '#a00000', texteCouleur: '#ffffff' },
+];
+
 const DEFAUT_ENSEIGNES = [
   { id: 'e1', nom: 'Supermarché', lettre: 'S', couleur: '#38bdf8', texteCouleur: '#ffffff', logoType: 'lettre', logoData: null },
   { id: 'e2', nom: 'Boulangerie', lettre: 'B', couleur: '#fb923c', texteCouleur: '#ffffff', logoType: 'lettre', logoData: null },
@@ -793,7 +864,9 @@ let enseignes = raw_enseignes.map(e => ({
   nom: e.nom,
   couleur: e.couleur || '#888888',
   texteCouleur: e.texteCouleur || '#ffffff',
-  fontSize: e.fontSize || 1.4
+  fontSize: e.fontSize || 1.4,
+  logoData: e.logoData || null,
+  afficherNom: e.afficherNom || false
 }));
 let articles = charger('mc_articles', DEFAUT_ARTICLES);
 let ordreMagasins = charger('mc_ordre', enseignes.map(e => e.id));
@@ -806,6 +879,8 @@ let editEnseigneId = null;
 let editCouleurSelectionnee = '#FF6B9D';
 let editTexteCouleur = '#ffffff';
 let editFontSize = 1.4;
+let editLogoData = null;
+let editAfficherNom = false;
 let editLogoOpt = 'lettre';
 let editLogoBase64 = null;
 
@@ -906,9 +981,18 @@ function creerCarteMagasin(e, idx) {
   const bg = e.couleur || '#888';
   const tc = e.texteCouleur || '#fff';
   div.style.background = bg;
+  const nomHTML = (!e.logoData || e.afficherNom)
+    ? `<div style="font-family:'Oswald',sans-serif;font-weight:700;font-size:${e.fontSize || 1.4}rem;letter-spacing:2px;text-transform:uppercase;color:${tc};text-align:center;line-height:1.3;text-shadow:2px 3px 6px rgba(0,0,0,0.35),0 1px 2px rgba(0,0,0,0.25);padding:0 8px;${e.logoData ? 'position:absolute;bottom:8px;left:0;right:0' : ''}">${e.nom}</div>`
+    : '';
+  if (e.logoData) {
+    div.style.backgroundImage = `url(${e.logoData})`;
+    div.style.backgroundSize = '80%';
+    div.style.backgroundPosition = 'center';
+    div.style.backgroundRepeat = 'no-repeat';
+  }
   div.innerHTML = `
-    <div class="carte-header" style="position:relative;background:transparent;min-height:120px" onclick="ouvrirCoursesEnseigne('${e.id}')">
-      <div style="font-family:'Oswald',sans-serif;font-weight:700;font-size:${e.fontSize || 1.4}rem;letter-spacing:2px;text-transform:uppercase;color:${tc};text-align:center;line-height:1.3;text-shadow:2px 3px 6px rgba(0,0,0,0.35),0 1px 2px rgba(0,0,0,0.25);padding:0 8px">${e.nom}</div>
+    <div class="carte-header" style="position:relative;background:transparent;min-height:120px;flex-direction:column;justify-content:center" onclick="ouvrirCoursesEnseigne('${e.id}')">
+      ${nomHTML}
       ${nb > 0 ? `<div class="badge" style="background:rgba(0,0,0,0.25);color:${tc}">${nb}</div>` : ''}
     </div>
   `;
@@ -1039,7 +1123,7 @@ function ouvrirCoursesEnseigne(enseigneId) {
     document.getElementById('modal-courses-liste').innerHTML = arts.map(a => {
       const isBarre = barre[a.id];
       return `
-        <div class="modal-article ${isBarre ? 'barre' : ''}" id="ma-${a.id}" data-art-id="${a.id}" onclick="toggleBarre('${a.id}')">
+        <div class="modal-article ${isBarre ? 'barre' : ''}" id="ma-${a.id}" data-art-id="${a.id}" onpointerdown="artItemPointerDown(event,'${a.id}')" onpointerup="artItemPointerUp(event,'${a.id}')" onpointercancel="artItemCancel()" onclick="event.preventDefault()">
           <span class="modal-art-nom" style="text-decoration:${isBarre ? 'line-through' : 'none'}">${a.nom}</span>
           <span class="modal-art-drag" onpointerdown="artDragStart(event,'${a.id}')" onclick="event.stopPropagation()">☰</span>
         </div>`;
@@ -1047,10 +1131,60 @@ function ouvrirCoursesEnseigne(enseigneId) {
     initArticleDrag();
   }
 
-  const coches = arts.filter(a => barre[a.id]);
-  const btnEffacer = document.getElementById('btn-effacer-coches');
-  if (btnEffacer) btnEffacer.style.display = coches.length > 0 ? 'block' : 'none';
+  document.getElementById('btn-effacer-coches').style.display = 'none';
   ouvrirModal('modal-courses');
+}
+
+let artLongPressId = null;
+let artLongPressTimerItem = null;
+let artDidLongPress = false;
+
+function artItemPointerDown(e, id) {
+  // Ignorer si c'est la poignée drag
+  if (e.target.classList.contains('modal-art-drag')) return;
+  artLongPressId = id;
+  artDidLongPress = false;
+  artLongPressTimerItem = setTimeout(() => {
+    artDidLongPress = true;
+    if (navigator.vibrate) navigator.vibrate(40);
+    const a = articles.find(x => x.id === id);
+    if (a) {
+      document.getElementById('modal-art-options-nom').textContent = a.nom;
+      artOptionsId = id;
+      ouvrirModal('modal-art-options');
+    }
+  }, 500);
+}
+
+function artItemPointerUp(e, id) {
+  if (e.target.classList.contains('modal-art-drag')) return;
+  clearTimeout(artLongPressTimerItem);
+  if (!artDidLongPress) toggleBarre(id);
+  artDidLongPress = false;
+}
+
+function artItemCancel() {
+  clearTimeout(artLongPressTimerItem);
+  artDidLongPress = false;
+}
+
+let artOptionsId = null;
+
+function supprimerArticleDepuisModal() {
+  if (!artOptionsId) return;
+  articles = articles.filter(a => a.id !== artOptionsId);
+  sauvegarder();
+  fermerModal('modal-art-options');
+  const ensId = document.getElementById('modal-courses-titre').dataset.enseigneId;
+  ouvrirCoursesEnseigne(ensId);
+  render();
+}
+
+function modifierArticleDepuisModal() {
+  if (!artOptionsId) return;
+  fermerModal('modal-art-options');
+  fermerModal('modal-courses');
+  editerArticle(artOptionsId);
 }
 
 function toggleBarre(id) {
@@ -1061,12 +1195,7 @@ function toggleBarre(id) {
   el.classList.toggle('barre', barre[id]);
   const nom = el.querySelector('.modal-art-nom');
   if (nom) nom.style.textDecoration = barre[id] ? 'line-through' : '';
-  // Mettre à jour visibilité bouton effacer
-  const ensId = document.getElementById('modal-courses-titre').dataset.enseigneId;
-  const arts = articles.filter(a => a.enseigneId === ensId);
-  const hasCoche = arts.some(a => barre[a.id]);
-  const btnE = document.getElementById('btn-effacer-coches');
-  if (btnE) btnE.style.display = hasCoche ? 'block' : 'none';
+
 }
 
 
@@ -1109,12 +1238,16 @@ function editEnseigne(id) {
     editCouleurSelectionnee = e.couleur || '#FF6B9D';
     editTexteCouleur = e.texteCouleur || '#ffffff';
     editFontSize = e.fontSize || 1.4;
+    editLogoData = e.logoData || null;
+    editAfficherNom = e.afficherNom || false;
   } else {
     document.getElementById('modal-edit-titre').textContent = 'Nouvelle enseigne';
     document.getElementById('edit-nom').value = '';
     editCouleurSelectionnee = '#FF6B9D';
     editTexteCouleur = '#ffffff';
     editFontSize = 1.4;
+    editLogoData = null;
+    editAfficherNom = false;
   }
 
   // Swatches fond
@@ -1129,7 +1262,21 @@ function editEnseigne(id) {
   const fsLbl = document.getElementById('fontsize-label'); if (fsLbl) fsLbl.textContent = editFontSize.toFixed(1);
 
   ouvrirModal('modal-edit-enseigne');
-  setTimeout(majApercu, 50);
+  setTimeout(() => {
+    majApercu();
+    majApercuLogo();
+    const chk = document.getElementById('chk-afficher-nom');
+    if (chk) chk.checked = editAfficherNom;
+    // Remplir les suggestions
+    const sg = document.getElementById('enseignes-suggerees');
+    if (sg) {
+      sg.innerHTML = ENSEIGNES_CONNUES.map(e => `
+        <button onclick="choisirEnseigne(this)" data-nom="${e.nom}" data-couleur="${e.couleur}" data-texte="${e.texteCouleur}"
+          class="btn-enseigne-suggeree" style="background:${e.couleur} !important;color:${e.texteCouleur} !important">
+          ${e.nom}
+        </button>`).join('');
+    }
+  }, 50);
 }
 
 function ajouterEnseigne() {
@@ -1236,6 +1383,57 @@ function choisirCouleurTexteCustom(val) {
   majApercu();
 }
 
+function choisirEnseigne(btn) {
+  document.getElementById('edit-nom').value = btn.dataset.nom;
+  editCouleurSelectionnee = btn.dataset.couleur;
+  editTexteCouleur = btn.dataset.texte;
+  document.querySelectorAll('#color-picker-fond [data-color]').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('#color-picker-texte [data-texte]').forEach(s => s.classList.remove('active'));
+  majApercu();
+}
+
+function importerLogo(input) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    // Redimensionner via canvas
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const max = 200;
+      const ratio = Math.min(max / img.width, max / img.height);
+      canvas.width = Math.round(img.width * ratio);
+      canvas.height = Math.round(img.height * ratio);
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      editLogoData = canvas.toDataURL('image/png', 0.85);
+      majApercuLogo();
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function supprimerLogo() {
+  editLogoData = null;
+  document.getElementById('input-logo-file').value = '';
+  majApercuLogo();
+}
+
+function majApercuLogo() {
+  const apercu = document.getElementById('apercu-logo-tuile');
+  const btnSuppr = document.getElementById('btn-suppr-logo');
+  if (!apercu) return;
+  if (editLogoData) {
+    apercu.innerHTML = `<img src="${editLogoData}" style="width:100%;height:100%;object-fit:contain;border-radius:10px">`;
+    if (btnSuppr) btnSuppr.style.display = 'flex';
+  } else {
+    apercu.innerHTML = '<span style="color:#ccc;font-size:1.4rem">🖼️</span>';
+    if (btnSuppr) btnSuppr.style.display = 'none';
+  }
+  majApercu();
+}
+
 function changerTaille(delta) {
   editFontSize = Math.round((editFontSize + delta) * 10) / 10;
   editFontSize = Math.min(2.5, Math.max(0.6, editFontSize));
@@ -1269,11 +1467,13 @@ function validerEnseigneEdit() {
   if (editEnseigneId) {
     const idx = enseignes.findIndex(e => e.id === editEnseigneId);
     if (idx > -1) {
-      enseignes[idx] = { ...enseignes[idx], nom, couleur: editCouleurSelectionnee, texteCouleur: editTexteCouleur, fontSize };
+      const afficherNom = document.getElementById('chk-afficher-nom').checked;
+      enseignes[idx] = { ...enseignes[idx], nom, couleur: editCouleurSelectionnee, texteCouleur: editTexteCouleur, fontSize, logoData: editLogoData, afficherNom };
     }
   } else {
     const newId = 'e' + Date.now();
-    enseignes.push({ id: newId, nom, couleur: editCouleurSelectionnee, texteCouleur: editTexteCouleur, fontSize });
+    const afficherNom2 = document.getElementById('chk-afficher-nom').checked;
+    enseignes.push({ id: newId, nom, couleur: editCouleurSelectionnee, texteCouleur: editTexteCouleur, fontSize, logoData: editLogoData, afficherNom: afficherNom2 });
     ordreMagasins.push(newId);
   }
   sauvegarder();
