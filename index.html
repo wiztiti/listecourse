@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;900&family=Pacifico&family=Oswald:wght@700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --rose: #FF6B9D;
+    --rose: #4a4a6a;
     --jaune: #FFD93D;
     --blanc: #FFFFFF;
     --gris-clair: #F5F5F5;
@@ -27,7 +27,7 @@
   body {
     font-family: 'Nunito', sans-serif;
     min-height: 100dvh;
-    background: linear-gradient(170deg, #FF6B9D 0%, #FF9A6C 40%, #FFD93D 100%);
+    background: linear-gradient(160deg, #e0f7fa 0%, #b2ebf2 40%, #c8e6c9 100%);
     padding: 16px 0 100px 0;
     touch-action: pan-y;
     display: flex;
@@ -45,7 +45,7 @@
   /* GRILLE */
   .grille {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
     gap: 14px;
     padding: 12px 14px;
   }
@@ -118,7 +118,7 @@
 
   /* CARTE LISTE */
   .carte-liste { grid-column: 1 / -1; }
-  .carte-liste .carte-header { background: linear-gradient(135deg, #fff5f9, #fff); min-height: 60px; padding: 10px 16px; flex-direction: row; justify-content: center; gap: 12px; }
+  .carte-liste .carte-header { background: #ffffff; min-height: 60px; padding: 10px 16px; flex-direction: row; justify-content: center; gap: 12px; }
   .carte-liste .carte-logo { background: linear-gradient(135deg, #FF6B9D, #FF9A6C); color: white; width: 38px !important; height: 38px !important; font-size: 1.1rem !important; border-radius: 10px !important; }
 
   .carte-liste.ouverte .carte-header { border-bottom: 1px solid #f0f0f0; }
@@ -156,7 +156,7 @@
   .input-row select:focus { border-color: var(--rose); }
 
   .btn {
-    background: linear-gradient(135deg, var(--rose), #FF9A6C);
+    background: linear-gradient(135deg, #2d2d44, #3d3d5c);
     color: white;
     border: none;
     border-radius: 12px;
@@ -220,10 +220,29 @@
 
   /* CARTE ENSEIGNE */
   .carte-magasin .carte-logo { border: 2px solid #eee; }
+  .carte-magasin {
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.6) inset,
+      0 -2px 0 rgba(0,0,0,0.15) inset,
+      0 6px 0 rgba(0,0,0,0.15),
+      0 8px 16px rgba(0,0,0,0.2);
+    border-bottom: 3px solid rgba(0,0,0,0.2);
+    transform: translateY(0);
+    transition: transform 0.12s, box-shadow 0.12s;
+  }
+  .carte-magasin:active {
+    transform: translateY(3px);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.6) inset,
+      0 -2px 0 rgba(0,0,0,0.15) inset,
+      0 2px 0 rgba(0,0,0,0.15),
+      0 3px 8px rgba(0,0,0,0.15);
+    border-bottom-width: 1px;
+  }
 
   /* CARTE REGLAGES */
   .carte-reglages { grid-column: 1 / -1; }
-  .carte-reglages .carte-header { background: linear-gradient(135deg, #f8f4ff, #fff); min-height: 60px; padding: 10px 16px; flex-direction: row; justify-content: center; gap: 12px; }
+  .carte-reglages .carte-header { background: #ffffff; min-height: 60px; padding: 10px 16px; flex-direction: row; justify-content: center; gap: 12px; }
   .carte-reglages .carte-logo { background: linear-gradient(135deg, #a18cd1, #fbc2eb); color: white; font-size: 1.1rem; width: 38px !important; height: 38px !important; border-radius: 10px !important; }
 
 
@@ -440,7 +459,7 @@
     width: 100%;
     margin-top: 18px;
     padding: 14px;
-    background: linear-gradient(135deg, var(--rose), #FF9A6C);
+    background: linear-gradient(135deg, #2d2d44, #3d3d5c);
     color: white;
     border: none;
     border-radius: 16px;
@@ -453,7 +472,7 @@
   /* MODAL CHOIX ENSEIGNE (pour "je pars") */
   .enseigne-choix-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
     gap: 10px;
     margin-bottom: 6px;
   }
@@ -528,7 +547,7 @@
   .btn-valider {
     width: 100%;
     padding: 14px;
-    background: linear-gradient(135deg, var(--rose), #FF9A6C);
+    background: linear-gradient(135deg, #2d2d44, #3d3d5c);
     color: white;
     border: none;
     border-radius: 16px;
@@ -660,7 +679,7 @@
     <div id="modal-courses-liste"></div>
     <div style="display:flex;gap:8px;margin-top:12px;flex-shrink:0">
       <input class="form-input" type="text" id="modal-cours-input" placeholder="Ajouter un produit…" style="flex:1;margin:0" onkeydown="if(event.key==='Enter')ajouterDepuisModal()">
-      <button onclick="ajouterDepuisModal()" style="background:linear-gradient(135deg,#FF6B9D,#FF9A6C);color:white;border:none;border-radius:12px;padding:0 16px;font-size:1.2rem;cursor:pointer;font-weight:900">+</button>
+      <button onclick="ajouterDepuisModal()" style="background:#2d2d44;color:white;border:none;border-radius:12px;padding:0 16px;font-size:1.2rem;cursor:pointer;font-weight:900">+</button>
     </div>
     <div id="btn-effacer-coches" style="display:none;margin-top:16px;border-top:1px solid #f0f0f0;padding-top:16px">
       <label style="display:flex;align-items:center;gap:10px;font-size:0.88rem;color:#888;cursor:pointer;margin-bottom:14px">
@@ -940,7 +959,7 @@ function creerCarteListe() {
 
   div.innerHTML = `
     <div class="carte-header" onclick="toggleCarte('liste')">
-      <div class="carte-logo" style="background:linear-gradient(135deg,#FF6B9D,#FF9A6C);color:white;font-size:1.5rem">📝</div>
+      <div class="carte-logo" style="background:#2d2d44;color:white;font-size:1.5rem">📝</div>
       <div class="carte-nom">Ma liste de courses</div>
       ${total > 0 ? `<div class="badge">${total}</div>` : ''}
     </div>
@@ -998,7 +1017,7 @@ function creerCarteMagasin(e, idx) {
   div.innerHTML = `
     <div class="carte-header" style="position:relative;background:transparent;min-height:120px;flex-direction:column;justify-content:center" onclick="ouvrirCoursesEnseigne('${e.id}')">
       ${nomHTML}
-      ${nb > 0 ? `<div class="badge" style="background:rgba(0,0,0,0.25);color:${tc}">${nb}</div>` : ''}
+      ${nb > 0 ? `<div class="badge" style="background:rgba(0,0,0,0.3);color:#fff;font-size:0.75rem">${nb}</div>` : ''}
     </div>
   `;
   return div;
