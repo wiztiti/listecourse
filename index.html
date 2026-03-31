@@ -1344,6 +1344,8 @@ function ajouterDepuisModal() {
   input.focus();
   // Rafraîchir la liste dans le modal
   ouvrirCoursesEnseigne(ensId);
+  // Mettre à jour les tuiles en arrière-plan
+  render();
   // Revenir en haut de la liste
   const liste = document.getElementById('modal-courses-liste');
   if (liste) liste.scrollTop = 0;
@@ -1669,9 +1671,30 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
+
+// ===================== BOUTON RETOUR ANDROID =====================
+function pushModalState() {
+  history.pushState({ modal: true }, '');
+}
+
+window.addEventListener('popstate', e => {
+  // Si un modal est ouvert, le fermer au lieu de quitter
+  const modals = ['modal-courses', 'modal-edit-enseigne', 'modal-edit-article',
+                  'modal-confirm-suppr', 'modal-art-options', 'modal-choix'];
+  for (const id of modals) {
+    const el = document.getElementById(id);
+    if (el && el.classList.contains('visible')) {
+      fermerModal(id);
+      history.pushState({ modal: true }, ''); // remettre l'état pour le prochain retour
+      return;
+    }
+  }
+});
+
 // ===================== MODAUX =====================
 function ouvrirModal(id) {
   document.getElementById(id).classList.add('visible');
+  history.pushState({ modal: true }, '');
 }
 function fermerModal(id) {
   document.getElementById(id).classList.remove('visible');
